@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Book, Database, Flasks, Microscope, Dna } from "lucide-react";
+import { Book, Database, Flask, Microscope, Dna } from "lucide-react";
 
 const About = () => {
   return (
@@ -61,7 +61,7 @@ const About = () => {
           <Card className="md:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Flasks className="h-6 w-6 text-biology" />
+                <Flask className="h-6 w-6 text-biology" />
                 For Scientists, By Scientists
               </CardTitle>
             </CardHeader>
