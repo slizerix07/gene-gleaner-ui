@@ -20,7 +20,7 @@ export async function extractBiologyInfo(url: string): Promise<any> {
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       throw new Error(
-        errorData?.message || `Error: ${response.status} ${response.statusText}`
+        errorData?.message || errorData?.error || `Error: ${response.status} ${response.statusText}`
       );
     }
     

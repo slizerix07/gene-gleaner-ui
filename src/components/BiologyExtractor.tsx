@@ -9,12 +9,14 @@ import { toast } from "sonner";
 import JsonViewer from "./JsonViewer";
 import { extractBiologyInfo } from "@/services/extractionService";
 import { isValidUrl, isUrlEmpty } from "@/lib/validations";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const BiologyExtractor: React.FC = () => {
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any | null>(null);
+  const [isOpen, setIsOpen] = useState(true);
   
   const handleExtract = async () => {
     // Reset states
@@ -38,6 +40,7 @@ const BiologyExtractor: React.FC = () => {
       const data = await extractBiologyInfo(url);
       setResult(data);
       toast.success("Biology information extracted successfully!");
+      setIsOpen(true); // Automatically open the result
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
       toast.error("Failed to extract biology information");
@@ -57,9 +60,9 @@ const BiologyExtractor: React.FC = () => {
       
       <CardContent className="pt-6">
         <div className="flex flex-col gap-4">
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                 <Link size={18} />
               </div>
               <Input 
@@ -95,9 +98,20 @@ const BiologyExtractor: React.FC = () => {
           )}
           
           {result && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-md">
-              <div className="text-sm font-medium text-gray-500 mb-2">Results:</div>
-              <JsonViewer data={result} expanded={true} />
+            <div className="mt-4 rounded-md bg-gray-50 p-4">
+              <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium text-gray-500">Results:</div>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      {isOpen ? "Collapse" : "Expand"}
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
+                <CollapsibleContent>
+                  <JsonViewer data={result} expanded={true} />
+                </CollapsibleContent>
+              </Collapsible>
             </div>
           )}
         </div>
