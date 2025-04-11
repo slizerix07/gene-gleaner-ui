@@ -19,7 +19,7 @@ const Navbar: React.FC = () => {
           {/* Logo/Brand */}
           <Link to="/" className="flex items-center space-x-2">
             <Book className="h-6 w-6 text-biology" />
-            <span className="text-xl font-semibold text-gray-800 dark:text-white">Gene Gleaner</span>
+            <span className="text-xl font-semibold text-gray-800 dark:text-white">OncoTrace.ai</span>
           </Link>
           
           {/* Desktop Navigation Links */}

@@ -1,13 +1,12 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle, Link } from "lucide-react";
+import { Loader2, AlertCircle, Link, Download } from "lucide-react";
 import { toast } from "sonner";
 import JsonViewer from "./JsonViewer";
-import { extractBiologyInfo } from "@/services/extractionService";
+import { extractBiologyInfo, downloadAsJson } from "@/services/extractService";
 import { isValidUrl, isUrlEmpty } from "@/lib/validations";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -19,28 +18,39 @@ const BiologyExtractor: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
   
   const handleExtract = async () => {
-    // Reset states
     setError(null);
     setResult(null);
-    
-    // Validate URL
+  
     if (isUrlEmpty(url)) {
       setError("Please enter a URL");
       return;
     }
-    
+  
     if (!isValidUrl(url)) {
       setError("Please enter a valid URL");
       return;
     }
-    
-    // Extract biology information
+  
     try {
       setIsLoading(true);
-      const data = await extractBiologyInfo(url);
-      setResult(data);
-      toast.success("Biology information extracted successfully!");
-      setIsOpen(true); // Automatically open the result
+  
+      const response = await fetch("http://localhost:5000/api/extract", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url })
+      });
+  
+      const data = await response.json();
+  
+      if (data.redirect_url) {
+        toast.success("Redirecting to annotated Streamlit view...");
+        window.location.href = data.redirect_url; // 👈 Redirect to Streamlit app
+      } else {
+        setError("Extraction succeeded, but no redirect URL was provided.");
+      }
+  
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
       toast.error("Failed to extract biology information");
@@ -49,12 +59,20 @@ const BiologyExtractor: React.FC = () => {
     }
   };
   
+  
+  const handleDownload = () => {
+    if (result) {
+      downloadAsJson(result);
+      toast.success("JSON file downloaded successfully!");
+    }
+  };
+  
   return (
     <Card className="w-full max-w-2xl shadow-lg">
       <CardHeader className="border-b">
-        <CardTitle className="text-biology">Biology Information Extractor</CardTitle>
+        <CardTitle className="text-biology">Cancer Biomarker Identification</CardTitle>
         <CardDescription>
-          Paste an article URL to extract biology-related information
+          Paste an article URL to extract the information
         </CardDescription>
       </CardHeader>
       
@@ -102,11 +120,22 @@ const BiologyExtractor: React.FC = () => {
               <Collapsible open={isOpen} onOpenChange={setIsOpen}>
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-medium text-gray-500">Results:</div>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      {isOpen ? "Collapse" : "Expand"}
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleDownload}
+                      className="flex items-center gap-1"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download JSON
                     </Button>
-                  </CollapsibleTrigger>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        {isOpen ? "Collapse" : "Expand"}
+                      </Button>
+                    </CollapsibleTrigger>
+                  </div>
                 </div>
                 <CollapsibleContent>
                   <JsonViewer data={result} expanded={true} />
@@ -117,9 +146,9 @@ const BiologyExtractor: React.FC = () => {
         </div>
       </CardContent>
       
-      <CardFooter className="border-t bg-gray-50 text-xs text-gray-500">
-        <p>This tool extracts biology information from scientific articles and web pages.</p>
-      </CardFooter>
+      {/* <CardFooter className="border-t bg-gray-50 text-xs text-gray-500">
+        <p>This tool extracts Cancer  information from scientific articles and web pages.</p>
+      </CardFooter> */}
     </Card>
   );
 };
