@@ -4,8 +4,7 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import logging
-from urllib.parse import urlencode, quote_plus 
-import json
+from urllib.parse import urlencode 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
@@ -32,7 +31,7 @@ def extract_biology_info():
 
         annotated_result = extract_semantic_fields(result)
         new_result = annotated_result
-        params = f"data={quote_plus(json.dumps(new_result))}"
+        params = urlencode(new_result)
         streamlit_url = f"http://localhost:8501?{params}"   
 
         return jsonify({"redirect_url": streamlit_url}), 200
